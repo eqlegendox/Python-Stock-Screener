@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="Home.css">
+</head>
+
+<body>
+
+    <header class="navigationBar">
+        <div class="seerlogos"><img class="seerlogo" src="seerlogo.png" alt="logo" height="75" id="seerlogo"></div>
+        <nav>
+            <ul class="nav_links">
+                <li><a href="Home.html">Home</a></li>
+                <li><a href="About.html">About</a></li>
+                <li><a href="News.html">News</a></li>
+                <li><a href="Credits.html">Credits</a></li>
+            </ul>
+        </nav> 
+        <button class="loginBtn" onclick="location.href='loginpage.html'">Login</button>
+    </header>
+
+    <div class="backgroundVideo">
+        <video autoplay muted loop id="bg-video">
+            <source src="stockvideo.mp4">
+        </video>
+    </div>
+
+    <div class="wrapper1">
+        <div class="vission-mission">
+            <h2>SEER: An Eye For Trade</h2>
+            <ul style="list-style-type:circle">
+                <li style="color:white">This website was created for Regents SLC and was intended to be used only as a screener that displays stocks but does not buy them.</li>
+                &nbsp
+                <li style="color:white">As we students continue to grow older, our time left as kids and teens is very limited as we begin to transition towards adulthood.</li>
+                &nbsp
+                <li style="color:white">With that we need to know how to make our own money.</li>
+                &nbsp
+                <li style="color:white">By creating SEER, we allow people to gain access towards a platform that is able to display current stock prices for users to analyse and interpret to make decisions</li>
+                &nbsp
+                <li style="color:white">With that being said, SEER hopes that you can enjoy its services.</li>
+            </ul>
+            &nbsp
+            <p style="font-size:12px">Sincerely, The Creators</p>
+            <p style="font-size:12px">Maximus, Danny, Steven, Marlon, Taka</p>
+            <p style="font-size:12px">Regents SLC 2024 Project</p>
+        </div>
+
+    <div class="wrapper2">
+        <div class="candidate-wrap">
+            <h2>Explore SEER</h2>
+            <div class="candidate-select">
+                <div class="candidate" id="candidate1">
+                    <div class="area"></div>
+                    <button class="learn-more" onclick="location.href='#'">Think</button>
+                </div>
+                <div class="candidate" id="candidate2">
+                    <div class="area"></div>
+                    <button class="learn-more" onclick="location.href='#'">Explore</button>
+                </div>
+                <div class="candidate" id="candidate3">
+                    <div class="area"></div>
+                    <button class="learn-more" onclick="location.href='#'">Simulate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="Home.js"></script>
+</body>
+</html>
