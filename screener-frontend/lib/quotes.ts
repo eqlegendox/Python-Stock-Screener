@@ -82,17 +82,72 @@ export async function getQuotes(symbols: string[], cacheSeconds = 20): Promise<R
   return map
 }
 
-// Latest daily bar per symbol, for the cron append. Always fresh (no cache).
-// Finnhub /quote lacks volume, so the appended bar carries volume 0 (a display-
-// only stat; conditions don't use it).
+// Latest daily bar per symbol, for the cron append. Prefers Twelve Data's batch
+// /quote (up to 120 symbols/call → the whole universe in a handful of calls,
+// well within one function invocation). Falls back to Finnhub per-symbol when
+// only that key is set. volume comes through when the provider supplies it.
+const TWELVEDATA = 'https://api.twelvedata.com/quote'
+
 export async function getDailyBars(symbols: string[]): Promise<Record<string, Bar>> {
-  if (!isQuotesConfigured() || !symbols.length) return {}
+  if (!symbols.length) return {}
   const date = easternDate()
+  const tdKey = process.env.TWELVEDATA_API_KEY
+
+  if (tdKey) {
+    const map: Record<string, Bar> = {}
+    const CHUNK = 100
+    for (let i = 0; i < symbols.length; i += CHUNK) {
+      const chunk = symbols.slice(i, i + CHUNK)
+      try {
+        const url = `${TWELVEDATA}?symbol=${chunk.join(',')}&apikey=${tdKey}`
+        const res = await fetch(url, { cache: 'no-store' })
+        if (!res.ok) continue
+        const json = (await res.json()) as Record<string, TdQuote> | TdQuote
+        // One symbol returns a bare object; many return a map keyed by symbol.
+        const entries = chunk.length === 1 ? { [chunk[0]]: json as TdQuote } : (json as Record<string, TdQuote>)
+        for (const [sym, q] of Object.entries(entries)) {
+          const bar = tdToBar(q, date)
+          if (bar) map[sym.toUpperCase()] = bar
+        }
+      } catch {
+        /* skip chunk */
+      }
+    }
+    return map
+  }
+
+  // Fallback: Finnhub per-symbol (no volume).
+  if (!isQuotesConfigured()) return {}
   const results = await pool(symbols, 8, (s) => fetchOne(s, 0))
   const map: Record<string, Bar> = {}
   for (const q of results) {
-    if (!q) continue
-    map[q.ticker] = { date, open: q.open, high: q.high, low: q.low, close: q.price, volume: 0 }
+    if (q) map[q.ticker] = { date, open: q.open, high: q.high, low: q.low, close: q.price, volume: 0 }
   }
   return map
+}
+
+interface TdQuote {
+  symbol?: string
+  open?: string
+  high?: string
+  low?: string
+  close?: string
+  volume?: string
+  status?: string
+}
+
+function tdToBar(q: TdQuote, date: string): Bar | null {
+  const close = parseFloat(q.close ?? '')
+  const high = parseFloat(q.high ?? '')
+  const low = parseFloat(q.low ?? '')
+  const open = parseFloat(q.open ?? '')
+  if (Number.isNaN(close) || Number.isNaN(high) || Number.isNaN(low)) return null
+  return {
+    date,
+    open: Number.isNaN(open) ? close : open,
+    high,
+    low,
+    close,
+    volume: parseFloat(q.volume ?? '0') || 0,
+  }
 }
