@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "screen": "node scripts/build-data.mjs",
-    "predev": "node scripts/build-data.mjs",
+    "screen": "tsx scripts/build-data.ts",
+    "seed": "tsx scripts/seed-blob.ts",
+    "predev": "tsx scripts/build-data.ts",
     "dev": "next dev",
-    "prebuild": "node scripts/build-data.mjs",
+    "prebuild": "tsx scripts/build-data.ts",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
+    "@vercel/blob": "^2.4.0",
     "next": "16.2.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -22,6 +24,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

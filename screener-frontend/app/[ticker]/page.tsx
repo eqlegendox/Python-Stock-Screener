@@ -14,7 +14,7 @@ import WatchlistButton from '@/components/WatchlistButton'
 
 export default async function StockPage({ params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params
-  const stock = getStock(ticker)
+  const stock = await getStock(ticker)
   if (!stock) notFound()
 
   const m = stock.metrics

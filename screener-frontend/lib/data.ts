@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import type { Conditions, ScreenParams } from './screen'
+import { isBlobConfigured, readScreenBlob, readStockBlob } from './store'
 
 export interface ScreenRow {
   ticker: string
@@ -52,20 +53,22 @@ export interface StockDetail {
 
 const DATA_DIR = path.join(process.cwd(), 'data')
 
-let cache: Screen | null = null
-
-export function getScreen(): Screen {
-  if (cache) return cache
+// Read order: Vercel Blob (production / live data) when configured, else the
+// committed JSON snapshot so `npm run dev` works offline.
+export async function getScreen(): Promise<Screen> {
+  if (isBlobConfigured()) {
+    const blob = await readScreenBlob()
+    if (blob) return blob
+  }
   const raw = fs.readFileSync(path.join(DATA_DIR, 'screen.json'), 'utf-8')
-  cache = JSON.parse(raw) as Screen
-  return cache
+  return JSON.parse(raw) as Screen
 }
 
-export function getTickers(): string[] {
-  return getScreen().stocks.map((s) => s.ticker)
-}
-
-export function getStock(ticker: string): StockDetail | null {
+export async function getStock(ticker: string): Promise<StockDetail | null> {
+  if (isBlobConfigured()) {
+    const blob = await readStockBlob(ticker)
+    if (blob) return blob
+  }
   const file = path.join(DATA_DIR, 'stocks', `${ticker.toUpperCase()}.json`)
   if (!fs.existsSync(file)) return null
   return JSON.parse(fs.readFileSync(file, 'utf-8')) as StockDetail
