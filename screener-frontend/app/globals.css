@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+/*
+  Minervini Momentum Terminal — a distinct dark trading terminal.
+  Electric-blue interactive accent, lime-green up, magenta-red down, amber slow-MA.
+*/
+
+:root {
+  --bg: #070a0f;
+  --bg-elevated: #0b1018;
+  --panel: #0f1620;
+  --panel-2: #141c28;
+  --panel-hover: #1a2433;
+
+  --border: #1c2735;
+  --border-strong: #2b394c;
+
+  --text: #eaf0f7;
+  --text-muted: #8a97a8;
+  --text-faint: #54626f;
+
+  --up: #36e27b;        /* uptrend / gain */
+  --up-dim: #1c8f4e;
+  --down: #ff5470;      /* downtrend / loss */
+  --down-dim: #a32a40;
+  --accent: #5b8cff;    /* electric blue — interactive / fast MA */
+  --amber: #f0883e;     /* slow MA / caution */
+  --violet: #c084fc;
+
+  --grid: #131c27;
+  --grid-strong: #233042;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-panel-hover: var(--panel-hover);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+
+  --color-up: var(--up);
+  --color-down: var(--down);
+  --color-accent: var(--accent);
+  --color-amber: var(--amber);
+  --color-violet: var(--violet);
+
+  --color-grid: var(--grid);
+  --color-grid-strong: var(--grid-strong);
+
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  font-feature-settings: "tnum" 1, "zero" 1;
+  background-image:
+    radial-gradient(1200px 720px at 84% -10%, rgba(91, 140, 255, 0.06), transparent 60%),
+    radial-gradient(900px 620px at -6% 108%, rgba(54, 226, 123, 0.05), transparent 55%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.013) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.013) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 46px 46px, 46px 46px;
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display), var(--font-mono), sans-serif;
+}
+
+::selection {
+  background: rgba(91, 140, 255, 0.28);
+  color: #fff;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Range slider — themed for the screen controls. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border-strong);
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(91, 140, 255, 0.6);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 52s linear infinite; }
+.marquee-pause:hover .animate-marquee { animation-play-state: paused; }
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.reveal { animation: reveal-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .reveal { animation: none; }
+}
