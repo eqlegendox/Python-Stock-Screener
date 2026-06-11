@@ -11,6 +11,7 @@ import RsGauge from '@/components/RsGauge'
 import ConditionChecklist from '@/components/ConditionChecklist'
 import SignalBadge from '@/components/SignalBadge'
 import WatchlistButton from '@/components/WatchlistButton'
+import LivePrice from '@/components/LivePrice'
 
 export default async function StockPage({ params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params
@@ -47,12 +48,7 @@ export default async function StockPage({ params }: { params: Promise<{ ticker: 
           <SignalBadge signal={signal} size="lg" />
           <WatchlistButton ticker={stock.ticker} size={22} />
         </div>
-        <div className="text-right">
-          <div className="font-mono text-3xl font-bold tabular-nums">{formatPrice(m.currentClose)}</div>
-          <div className="font-mono text-sm font-semibold tabular-nums" style={{ color: changeColor(m.return1y) }}>
-            {formatPct(m.return1y)} 1Y
-          </div>
-        </div>
+        <LivePrice ticker={stock.ticker} dailyClose={m.currentClose} return1y={m.return1y} />
       </header>
 
       {/* Key stats */}

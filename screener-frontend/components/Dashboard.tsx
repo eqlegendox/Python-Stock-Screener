@@ -14,6 +14,8 @@ import TickerTape from './TickerTape'
 import FreshnessBadge from './FreshnessBadge'
 import ScreenControls from './ScreenControls'
 import CompareOverlay from './CompareOverlay'
+import LiveBadge from './LiveBadge'
+import { useLiveQuotes } from '@/lib/useLiveQuotes'
 
 type SortKey = 'ticker' | 'rsRating' | 'currentClose' | 'pctFromHigh' | 'return1y' | 'met'
 type SortDir = 'asc' | 'desc'
@@ -70,6 +72,11 @@ export default function Dashboard({ rows, generatedAt }: Props) {
     return out
   }, [evaluated, query, passingOnly, watchOnly, watchlist, sortKey, sortDir])
 
+  // Poll live quotes for the top visible rows only (respects provider limits).
+  // Filtering/sorting stay on the daily metrics so rows don't reshuffle on ticks.
+  const pollSymbols = useMemo(() => filtered.slice(0, 40).map((e) => e.row.ticker), [filtered])
+  const live = useLiveQuotes(pollSymbols)
+
   const setSort = (key: SortKey) => {
     if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
     else {
@@ -96,7 +103,10 @@ export default function Dashboard({ rows, generatedAt }: Props) {
               S&amp;P 500 · Minervini trend template · RS rating &amp; moving-average screen
             </p>
           </div>
-          <FreshnessBadge generatedAt={generatedAt} lastDate={rows[0]?.lastDate} />
+          <div className="flex items-center gap-2">
+            <LiveBadge live={live.live} asOf={live.asOf} marketOpen={live.marketOpen} />
+            <FreshnessBadge generatedAt={generatedAt} lastDate={rows[0]?.lastDate} />
+          </div>
         </div>
       </header>
 
@@ -148,6 +158,12 @@ export default function Dashboard({ rows, generatedAt }: Props) {
             <tbody>
               {filtered.map(({ row: r, met, signal, passes }) => {
                 const align = maAlignment(r)
+                const q = live.quotes[r.ticker]
+                const price = q?.price ?? r.currentClose
+                const le = q ? evaluate({ ...r, currentClose: price }, params) : null
+                const dMet = le ? le.met : met
+                const dPasses = le ? le.passes : passes
+                const dSignal = le ? signalFor({ passes: dPasses, conditionsMet: dMet, rsRating: r.rsRating }) : signal
                 return (
                   <tr key={r.ticker} className="group border-b border-[var(--border)] transition-colors last:border-0 hover:bg-[var(--panel-hover)]">
                     <td className="pl-4">
@@ -164,14 +180,21 @@ export default function Dashboard({ rows, generatedAt }: Props) {
                     <td className="text-right font-mono text-sm font-semibold tabular-nums" style={{ color: r.rsRating >= 80 ? 'var(--up)' : r.rsRating >= 50 ? 'var(--accent)' : 'var(--text-muted)' }}>
                       {r.rsRating.toFixed(0)}
                     </td>
-                    <td className="text-right font-mono text-xs tabular-nums text-[var(--text)]">{formatPrice(r.currentClose)}</td>
+                    <td className="text-right font-mono text-xs tabular-nums">
+                      <span className="text-[var(--text)]">{formatPrice(price)}</span>
+                      {q && (
+                        <span className="ml-1" style={{ color: changeColor(q.changePct) }}>
+                          {q.changePct >= 0 ? '▲' : '▼'}
+                        </span>
+                      )}
+                    </td>
                     <td className="hidden text-right font-mono text-xs tabular-nums sm:table-cell" style={{ color: changeColor(r.return1y) }}>{formatPct(r.return1y)}</td>
                     <td className="hidden text-right font-mono text-xs tabular-nums text-[var(--text-muted)] lg:table-cell">{formatPct(r.pctFromHigh)}</td>
                     <td className="hidden text-center font-mono text-[11px] lg:table-cell" style={{ color: align === 'stacked' ? 'var(--up)' : align === 'inverted' ? 'var(--down)' : 'var(--text-faint)' }}>
                       {ALIGNMENT_LABEL[align]}
                     </td>
-                    <td className="text-center font-mono text-xs tabular-nums" style={{ color: passes ? 'var(--up)' : 'var(--text-muted)' }}>{met}/8</td>
-                    <td className="py-2.5"><SignalBadge signal={signal} size="sm" /></td>
+                    <td className="text-center font-mono text-xs tabular-nums" style={{ color: dPasses ? 'var(--up)' : 'var(--text-muted)' }}>{dMet}/8</td>
+                    <td className="py-2.5"><SignalBadge signal={dSignal} size="sm" /></td>
                     <td className="pr-4 text-center">
                       <input
                         type="checkbox"
