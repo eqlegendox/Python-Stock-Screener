@@ -1,12 +1,13 @@
 import type { ScreenRow } from './data'
 
-export type Signal = 'STRONG' | 'SETUP' | 'WEAK'
+export type Signal = 'STRONG' | 'SETUP' | 'WEAK' | 'AVOID'
 
 // Momentum signal from screen pass + how many conditions are met + RS strength.
 export function signalFor(row: Pick<ScreenRow, 'passes' | 'conditionsMet' | 'rsRating'>): Signal {
   if (row.passes) return 'STRONG'
   if (row.conditionsMet >= 6 && row.rsRating >= 60) return 'SETUP'
-  return 'WEAK'
+  if (row.conditionsMet >= 3 || row.rsRating >= 40) return 'WEAK'
+  return 'AVOID'
 }
 
 export type Alignment = 'stacked' | 'mixed' | 'inverted'

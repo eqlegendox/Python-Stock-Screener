@@ -6,7 +6,7 @@ interface Props {
 }
 
 // Lightweight hand-rolled SVG sparkline for table rows.
-export default function Sparkline({ values, width = 96, height = 28, color = 'var(--up)' }: Props) {
+export default function Sparkline({ values, width = 96, height = 36, color = 'var(--up)' }: Props) {
   if (values.length < 2) return <svg width={width} height={height} aria-hidden />
 
   const min = Math.min(...values)
